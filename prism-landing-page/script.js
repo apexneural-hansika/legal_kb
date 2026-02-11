@@ -1,58 +1,69 @@
-// Custom Cursor
+// Initialize GSAP
+gsap.registerPlugin(ScrollTrigger);
+
+// Custom Cursor Logic
 const cursor = document.querySelector('.cursor');
 document.addEventListener('mousemove', (e) => {
-    cursor.style.left = e.clientX + 'px';
-    cursor.style.top = e.clientY + 'px';
-});
-
-// Scroll Reveal
-const observerOptions = {
-    threshold: 0.1
-};
-
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            entry.target.style.opacity = "1";
-            entry.target.style.transform = "translateY(0)";
-            entry.target.classList.add('visible');
-        }
+    gsap.to(cursor, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.1
     });
-}, observerOptions);
-
-// Initialize cards for reveal
-document.querySelectorAll('.card, .stat, .hero-header, .hero-footer, .pillar-label').forEach(el => {
-    el.style.opacity = "0";
-    el.style.transform = "translateY(30px)";
-    el.style.transition = "all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1)";
-    observer.observe(el);
 });
 
-// Parallax Prism & Pillars
+// Hero Animation (GSAP)
+const tl = gsap.timeline({ defaults: { ease: "power4.out" } });
+
+tl.from(".prism-main-title", { y: 100, opacity: 0, duration: 1.5, letterSpacing: "50px" })
+  .from(".prism-subtitle", { opacity: 0, y: 20, duration: 1 }, "-=1")
+  .from(".prism-img", { scale: 0.8, opacity: 0, duration: 2, ease: "expo.out" }, "-=1.2")
+  .from(".label-pill", { 
+      opacity: 0, 
+      scale: 0.5, 
+      stagger: 0.2, 
+      duration: 1, 
+      ease: "back.out(1.7)" 
+  }, "-=1")
+  .from(".hero-footer > *", { opacity: 0, y: 30, stagger: 0.2, duration: 1 }, "-=0.5");
+
+// Parallax Effect for Prism & Pills
 document.addEventListener('mousemove', (e) => {
-    const moveX = (e.clientX - window.innerWidth / 2) * 0.015;
-    const moveY = (e.clientY - window.innerHeight / 2) * 0.015;
-    
-    const prism = document.querySelector('.prism-img');
-    const container = document.querySelector('.prism-container');
-    
-    if (prism) {
-        prism.style.transform = `translate(${moveX}px, ${moveY}px) rotateX(${moveY * 0.5}deg) rotateY(${-moveX * 0.5}deg)`;
-    }
+    const xPos = (e.clientX / window.innerWidth - 0.5) * 2;
+    const yPos = (e.clientY / window.innerHeight - 0.5) * 2;
 
-    // Individual pillar parallax
-    document.querySelectorAll('.pillar-label').forEach((label, index) => {
-        const factor = (index + 1) * 0.02;
-        label.style.transform = `translate(${moveX * factor * 50}px, ${moveY * factor * 50}px) scale(1)`;
+    gsap.to(".prism-img", {
+        x: xPos * 20,
+        y: yPos * 20,
+        rotationY: xPos * 10,
+        rotationX: -yPos * 10,
+        duration: 1
+    });
+
+    gsap.to(".intake", { x: xPos * 40, y: yPos * 40, duration: 1.2 });
+    gsap.to(".scoring", { x: xPos * 30, y: yPos * 30, duration: 1.2 });
+    gsap.to(".scheduling", { x: xPos * 50, y: yPos * 50, duration: 1.2 });
+});
+
+// Scroll Reveal Animations
+gsap.utils.toArray('[data-gsap="fade-up"]').forEach(card => {
+    gsap.from(card, {
+        scrollTrigger: {
+            trigger: card,
+            start: "top 85%",
+        },
+        y: 60,
+        opacity: 0,
+        duration: 1.2,
+        ease: "power3.out"
     });
 });
 
-// Button Hover Effects
-document.querySelectorAll('button').forEach(btn => {
-    btn.addEventListener('mouseenter', () => {
-        cursor.style.transform = 'scale(2.5)';
+// Button Interactions
+document.querySelectorAll('button, .label-pill').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+        gsap.to(cursor, { scale: 3, background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(5px)' });
     });
-    btn.addEventListener('mouseleave', () => {
-        cursor.style.transform = 'scale(1)';
+    el.addEventListener('mouseleave', () => {
+        gsap.to(cursor, { scale: 1, background: '#fff', backdropFilter: 'none' });
     });
 });
